@@ -35,7 +35,7 @@ public class EasyCompaired {
      * @return 返回orig和copy最少经过多少次变换得到
      */
     private static double getDistance(String orig, String copy){
-        int d[][]; // 矩阵
+        int [][]d; // 矩阵
         int n = orig.length();
         int m = copy.length();
         int i; // 遍历str1的

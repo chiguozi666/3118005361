@@ -3,6 +3,15 @@ import java.util.List;
 import java.util.Scanner;
 
 public class MainApplication {
+    public static void run(String origpath,String copypath,String outpath){
+        try{
+            List<String> orgin = TextUtil.getSentenses(IOUtil.getText(origpath));
+            List<String> copy = TextUtil.getSentenses(IOUtil.getText(copypath));
+            IOUtil.writeText(outpath,"重复率是:"+EasyCompaired.compaired(orgin,copy));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     public static void main(String[] args) throws IOException {
         Scanner sc = new Scanner(System.in);
         System.out.println("请输入原文本 样例C:\\homework\\orig.txt");
