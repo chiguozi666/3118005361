@@ -18,29 +18,32 @@ public class EasyCompaired {
         List<String> orgin = new EasyCompaired().getSentenses("C:\\homework\\orig.txt");
         List<String> copy = new EasyCompaired().getSentenses("C:\\homework\\orig_0.8_add.txt");
         compaired(orgin,copy);
-//        for(String a:orgin){
-//            System.out.println(a);
-//            System.out.println(1);
-//        }
     }
+
+    /**
+     * 读取文件，过滤，并且获得分了句子的list。
+     * @param path 需要得到文本的路径
+     * @return 一个过滤后，分句处理完的list
+     * @throws IOException
+     */
     public List<String> getSentenses(String path) throws IOException {
 
         File file = new File(path);
         StringBuffer stringBuffer = new StringBuffer();
+        //文件不存在就报错
         if(!file.exists()){
             throw new RuntimeException("文件名错误");
         }
 
-        byte datas [] = new byte[1024];
-        int data = -1;
+        byte []datas = new byte[1024];
         InputStream inputStream = new FileInputStream(file);
-        while((data = inputStream.read(datas))!=-1){
+        while(inputStream.read(datas)!=-1){
             stringBuffer.append(new String(datas));
             datas =  new byte[1024];
         }
-        String stringItems[] =  filterHtml(stringBuffer.toString())
+        String []stringItems =  filterHtml(stringBuffer.toString())
                 .replaceAll("\\s*|\t|\r|\n","")//去空格
-                .split("[，。！？；]");//划分
+                .split("[，。！？；]");//划分句子,“我喜欢吃，鸡扒！还有酱香饼。”分出来是[我喜欢吃，鸡扒，还有酱香饼]
         LinkedList<String>  result = new LinkedList<>();
         for(int i =0;i<stringItems.length-1;i++){
             System.out.println(stringItems[i]);
@@ -51,10 +54,10 @@ public class EasyCompaired {
 
     /**
      * 过滤去<>标签
-     * @param str
+     * @param str 需要处理的字符串
      * @return 返回一个没有标签的字符串
      */
-    public static String filterHtml(String str) {
+    private static String filterHtml(String str) {
         Pattern pattern = Pattern.compile(regxpForHtml);
         Matcher matcher = pattern.matcher(str);
         StringBuffer sb = new StringBuffer();
@@ -71,14 +74,14 @@ public class EasyCompaired {
      * 逐句比较
      * @param orgin 原文的句子
      * @param copy 要比较文章的句子
-     * @return
+     * @return 处理句子
      */
-    public static double compaired(List orgin,List copy){
+    private static double compaired(List orgin,List copy){
         orginlength = orgin.size();
         for (int i = 0; i < orgin.size(); i++) {
             for (int j = 0; j < copy.size(); j++) {
                 //单句假设重复度超过0.8那么就是重复语句
-                if(getSimilarityRatio((String)orgin.get(i),(String)copy.get(j))){
+                if(isSimilarity((String)orgin.get(i),(String)copy.get(j))){
                     System.out.println(orgin.get(i));
                     System.out.println(copy.get(j));
                     matchlength++;
@@ -87,16 +90,16 @@ public class EasyCompaired {
             }
         }
         System.out.println("匹配高重的语句数目:"+matchlength+"  总长度："+orginlength+"\n"+(float)matchlength/orginlength);
-        return 0;
+        return (float)matchlength/orginlength;
     }
 
     /**
      * 算出两个字符串之间最少改动多少次能相互得到
-     * @param orig
-     * @param copy
-     * @return
+     * @param orig 原文
+     * @param copy 字符串
+     * @return 返回orig和copy最少经过多少次变换得到
      */
-    public static double aTob(String orig,String copy){
+    private static double aTob(String orig,String copy){
         int d[][]; // 矩阵
         int n = orig.length();
         int m = copy.length();
@@ -113,10 +116,10 @@ public class EasyCompaired {
         }
         d = new int[n + 1][m + 1];
         for (i = 0; i <= n; i++) {
-            d[i][0] = i;
+            d[i][0] = i;//初始化第0列的距离
         }
         for (j = 0; j <= m; j++) {
-            d[0][j] = j;
+            d[0][j] = j;//初始化第0行的距离
         }
         for (i = 1; i <= n; i++) {
             ch1 = orig.charAt(i - 1);
@@ -129,12 +132,20 @@ public class EasyCompaired {
                     temp = 1;
                 }
                 //动态转移方程
+                //d[i][j] 的值由前面相邻的两个格子，以及左上对角线的得到，
                 d[i][j] = getMin(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1]+ temp);
             }
         }
         return d[n][m];
     }
-    public static boolean getSimilarityRatio(String str, String target)
+
+    /**
+     * 判断str和target是否相似
+     * @param str 原句子
+     * @param target 目标句子
+     * @return 是否相似
+     */
+    private static boolean isSimilarity(String str, String target)
     {
         //return (1 - (float) aTob(str, target) / Math.max(str.length(), target.length()))>0.75;
         float move =  (float)aTob(str,target);
@@ -142,7 +153,14 @@ public class EasyCompaired {
         return (lendif+move)/(str.length()+lendif)<0.5;
     }
 
-    public static int  getMin(int a,int b,int c){
+    /**
+     * 得到abc中的最小值
+     * @param a 其中一个值
+     * @param b 其中一个值
+     * @param c 其中一个值
+     * @return 最小的值
+     */
+    private static int getMin(int a,int b,int c){
         return (a = a < b ? a : b) < c ? a : c;
     }
 }
