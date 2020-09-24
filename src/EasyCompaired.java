@@ -71,9 +71,18 @@ public class EasyCompaired {
                 d[i][j] = getMin(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1]+ temp);
             }
         }
+//        for ( i=0;i<=n;i++){
+//            for (j = 0;  j<=m; j++) {
+//                System.out.print("\t"+d[i][j]);
+//            }
+//            System.out.println();
+//        }
         return d[n][m];
     }
 
+    public static void main(String[] args) {
+        getDistance("我喜欢吃牛扒","你喜欢打牛牛");
+    }
     /**
      * 判断str和target是否相似
      * @param str 原句子
